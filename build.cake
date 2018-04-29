@@ -90,7 +90,7 @@ public void ModifyProjectTriggers (OctopusRepository repository, List<ProjectTri
 public void ModifyProject (OctopusRepository repository, ProjectResource projectResource) {
     try {
         repository.Projects.Modify (projectResource);
-        Information ("Project was modified");
+        Information ($"Project {projectResource.Name} has been modified");
     } catch (Exception ex) {
         Error (ex.Message);
     }
@@ -124,7 +124,7 @@ public ProjectResource CreateProjectByClone (OctopusClient client, ProjectResour
 
         newproject = GetProjectResourceByName (repository: repository, projectName: destinationProject.Name);
     } else {
-        Information ($"Project {destinationProject.Name} already exists. Skipping.");
+        Information ($"Project {destinationProject.Name} already exists. Skipping clone.");
     }
 
     return newproject;
@@ -160,6 +160,10 @@ public static void UpdateDeploymentProcessTargetRoles (DeploymentProcessResource
     foreach (var stepToBeUpdated in stepsToBeUpdated) {
         stepToBeUpdated.TargetingRoles (targetRole);
     }
+}
+
+public static void UpdateProject(OctopusRepository repository, ProjectResource projectResource, OctopusDeployProject octopusDeployProject) {
+    projectResource.Description = octopusDeployProject.Description;
 }
 
 public static void UpdateProjectTriggerTargetRoles (List<ProjectTriggerResource> projectTriggers, string targetRole) {
@@ -253,8 +257,8 @@ Task ("Build")
             {
                 Name = project.Name,
                 Description = project.Description,
-                ProjectGroupId = "ProjectGroups-261",
-                LifecycleId = "Lifecycles-21"
+                ProjectGroupId = GetProjectGroupResourceByName(repository: repo, projectGroupName: project.Group).Id,
+                LifecycleId = GetLifecycleResourceByName(repository: repo, lifecycleName: "Default").Id
             };
 
             var newProject = CreateProjectByClone(client, projectTemplate, newProjectSkeleton);

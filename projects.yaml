@@ -1,7 +1,13 @@
 ---
-- name: Matt Test Project
-  description: My Test Project For Testing Projects
+- name: Customer Processing Service
+  description: Demo Service to Process Customers
   group: .NET Canaries
   type: WindowsService
   settings:
-    appgroup: my-app-group-svc
+    appgroup: customer-processing
+- name: Customer Web Service
+  description: Demo Web Service API for Customers
+  group: .NET Canaries
+  type: WebApplicationIIS
+  settings:
+    appgroup: customer-api
