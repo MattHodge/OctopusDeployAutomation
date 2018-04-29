@@ -1,0 +1,7 @@
+---
+- name: Matt Test Project
+  description: My Test Project For Testing Projects
+  group: .NET Canaries
+  type: WindowsService
+  settings:
+    appgroup: my-app-group-svc
