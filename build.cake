@@ -131,7 +131,15 @@ public ProjectResource CreateProjectByClone (OctopusClient client, ProjectResour
 }
 
 public static ProjectResource GetProjectResourceByName (OctopusRepository repository, string projectName) {
-    return repository.Projects.FindByName (projectName);
+    return repository.Projects.FindByName(projectName);
+}
+
+public static ProjectGroupResource GetProjectGroupResourceByName (OctopusRepository repository, string projectGroupName) {
+    return repository.ProjectGroups.FindByName(projectGroupName);
+}
+
+public static LifecycleResource GetLifecycleResourceByName (OctopusRepository repository, string lifecycleName) {
+    return repository.Lifecycles.FindByName(lifecycleName);
 }
 
 public static void UpdateDeploymentProcessTargetRoles (DeploymentProcessResource deploymentProcess, string targetRole) {
