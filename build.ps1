@@ -92,6 +92,11 @@ function GetProxyEnabledWebClient
 
 Write-Host "Preparing to run build script..."
 
+if($ENV:VSCODE_CLI -eq 1){
+    $Verbosity = "Verbose"
+    Write-Host "Running inside Visual Studio Code, upping the verbosity!"
+}
+
 if(!$PSScriptRoot){
     $PSScriptRoot = Split-Path $MyInvocation.MyCommand.Path -Parent
 }
@@ -216,8 +221,6 @@ if (!(Test-Path $CAKE_EXE)) {
     Throw "Could not find Cake.exe at $CAKE_EXE"
 }
 
-
-
 # Build Cake arguments
 $cakeArguments = @("$Script");
 if ($Target) { $cakeArguments += "-target=$Target" }
@@ -230,6 +233,9 @@ if ($Mono) { $cakeArguments += "-mono" }
 $cakeArguments += $ScriptArgs
 
 # Start Cake
-Write-Host "Running build script..."
+Write-Host "Running build script... " -NoNewLine
+if ($Verbosity) { Write-Host "$CAKE_EXE $cakeArguments" -ForegroundColor Yellow -NoNewLine }
+Write-Host ""
+
 &$CAKE_EXE $cakeArguments
 exit $LASTEXITCODE
