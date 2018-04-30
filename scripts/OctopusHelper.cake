@@ -16,7 +16,7 @@ public void CreateOctopusHelper(string OctopusServerURL, string OctopusAPIKey)
     _apiKey = OctopusAPIKey;
 }
 
-public OctopusRepository CreateOctopusRepository() 
+public OctopusRepository CreateOctopusRepository()
 {
     if (_client == null)
     {
@@ -33,57 +33,57 @@ public OctopusRepository CreateOctopusRepository()
     return _repo;
 }
 
-private OctopusClient CreateOctopusClient() 
+private OctopusClient CreateOctopusClient()
 {
     if (_client == null)
     {
-        Information($"Connecting to OctopusServer '{octopusServer}'...");
+        Information($"Connecting to OctopusServer '{_serverUrl}'...");
         _client = new OctopusClient(new OctopusServerEndpoint(_serverUrl, _apiKey));
     }
     return _client;
 }
 
-public void ModifyDeploymentProcess(DeploymentProcessResource deploymentProcess) 
+public void ModifyDeploymentProcess(DeploymentProcessResource deploymentProcess)
 {
     _repo.DeploymentProcesses.Modify(deploymentProcess);
-    Information($"DeploymentProcess \"{deploymentProcess.Id}\" has been modified");
+    Information($"DeploymentProcess '{deploymentProcess.Id}' has been modified");
 }
 
-public void ModifyVariableSet(VariableSetResource variableSet) 
+public void ModifyVariableSet(VariableSetResource variableSet)
 {
     _repo.VariableSets.Modify(variableSet);
-    Information($"VariableSet \"{variableSet.Id}\" has been modified");
+    Information($"VariableSet '{variableSet.Id}' has been modified");
 }
 
-public void ModifyProjectTriggers(IEnumerable<ProjectTriggerResource> projectTriggers) 
+public void ModifyProjectTriggers(IEnumerable<ProjectTriggerResource> projectTriggers)
 {
-    foreach (var projectTrigger in projectTriggers) 
+    foreach (var projectTrigger in projectTriggers)
     {
         _repo.ProjectTriggers.Modify(projectTrigger);
-        Information ($"ProjectTrigger \"{projectTrigger.Name}\" ({projectTrigger.Id}) has been modified");
+        Information ($"ProjectTrigger '{projectTrigger.Name}' ({projectTrigger.Id}) has been modified");
     }
 }
 
-public void ModifyProject(ProjectResource projectResource) 
+public void ModifyProject(ProjectResource projectResource)
 {
     _repo.Projects.Modify (projectResource);
-    Information ($"Project \"{projectResource.Name}\" ({projectResource.Id}) has been modified");
+    Information ($"Project '{projectResource.Name}' ({projectResource.Id}) has been modified");
 }
 
-public ProjectResource CreateProjectByClone(ProjectResource sourceProject, ProjectResource destinationProject) 
+public ProjectResource CreateProjectByClone(ProjectResource sourceProject, ProjectResource destinationProject)
 {
     var newProject = GetProjectResourceByName(destinationProject.Name);
 
-    if (newProject == null) 
+    if (newProject == null)
     {
         Information($"Project '{destinationProject.Name}' doesn't exist, creating by cloning from '{sourceProject.Name}'");
 
         _client.Post("~/api/projects?clone=" + sourceProject.Id, destinationProject);
-        
+
         newProject = GetProjectResourceByName(destinationProject.Name);
 
         Information($"Project '{destinationProject.Name}' has been created with ID '{newProject.Id}'");
-    } 
+    }
     else
     {
         Information ($"Project {destinationProject.Name} already exists with ID '{newProject.Id}'. Skipping clone action");
@@ -92,34 +92,34 @@ public ProjectResource CreateProjectByClone(ProjectResource sourceProject, Proje
     return newProject;
 }
 
-private ProjectResource GetProjectResourceByName(string projectName) 
+private ProjectResource GetProjectResourceByName(string projectName)
 {
     return _repo.Projects.FindByName(projectName);
 }
 
-private ProjectGroupResource GetProjectGroupResourceByName(string projectGroupName) 
+private ProjectGroupResource GetProjectGroupResourceByName(string projectGroupName)
 {
     return _repo.ProjectGroups.FindByName(projectGroupName);
 }
 
-public LifecycleResource GetLifecycleResourceByName(string lifecycleName) 
+public LifecycleResource GetLifecycleResourceByName(string lifecycleName)
 {
     return _repo.Lifecycles.FindByName(lifecycleName);
 }
 
-public DeploymentProcessResource UpdateDeploymentProcessTargetRoles(DeploymentProcessResource deploymentProcess, string targetRole) 
-{    
-    foreach (var step in deploymentProcess.Steps) 
+public DeploymentProcessResource UpdateDeploymentProcessTargetRoles(DeploymentProcessResource deploymentProcess, string targetRole)
+{
+    foreach (var step in deploymentProcess.Steps)
     {
-        foreach (var stepProperty in step.Properties.ToList()) 
+        foreach (var stepProperty in step.Properties.ToList())
         {
             if (stepProperty.Key == "Octopus.Action.TargetRoles") // Find steps that are pinned to a role
             {
                 if (stepProperty.Value.Value != "octopus-deploy") // Skip the octopus-deploy server role, we leave this the same
                 {
-                    Verbose($"    > Updating step \"{step.Name}\" ({step.Id}) setting TargetingRole to '{targetRole}'");
+                    Verbose($"    > Updating step '{step.Name}' ({step.Id}) setting TargetingRole to '{targetRole}'");
                     step.TargetingRoles(targetRole);
-                    Verbose($"    > Step \"{step.Name}\" ({step.Id}) updated");
+                    Verbose($"    > Step '{step.Name}' ({step.Id}) updated");
                 }
             }
         }
@@ -128,17 +128,17 @@ public DeploymentProcessResource UpdateDeploymentProcessTargetRoles(DeploymentPr
     return deploymentProcess;
 }
 
-public IEnumerable<ProjectTriggerResource> UpdateProjectTriggerTargetRoles(IEnumerable<ProjectTriggerResource> projectTriggers, string targetRole) 
+public IEnumerable<ProjectTriggerResource> UpdateProjectTriggerTargetRoles(IEnumerable<ProjectTriggerResource> projectTriggers, string targetRole)
 {
     var machineFilter = new MachineFilterResource();
     machineFilter.Roles.Add(targetRole);
     machineFilter.EventGroups.Add("MachineAvailableForDeployment");
 
-    foreach (var trigger in projectTriggers) 
+    foreach (var trigger in projectTriggers)
     {
-        Verbose($"    > Adding TriggerFilter to trigger \"{trigger.Name}\" ({trigger.Id})");
+        Verbose($"    > Adding TriggerFilter to trigger '{trigger.Name}' ({trigger.Id})");
         trigger.Filter = machineFilter;
-        Verbose($"    > Trigger \"{trigger.Name}\" ({trigger.Id}) updated");
+        Verbose($"    > Trigger '{trigger.Name}' ({trigger.Id}) updated");
         yield return trigger;
     }
 }
@@ -153,19 +153,19 @@ public VariableSetResource GetVariableSets(ProjectResource projectResource)
     return _repo.VariableSets.Get(projectResource.VariableSetId);
 }
 
-public IEnumerable<ProjectTriggerResource> GetProjectTriggers(ProjectResource projectResource) 
+public IEnumerable<ProjectTriggerResource> GetProjectTriggers(ProjectResource projectResource)
 {
     var projectTriggers = _repo.Projects.GetTriggers(projectResource);
 
-    foreach (var projectTrigger in projectTriggers.Items) 
+    foreach (var projectTrigger in projectTriggers.Items)
     {
         yield return _repo.ProjectTriggers.Get(projectTrigger.Id);
     }
 }
 
-public VariableSetResource UpdateVariableStepAppGroup (VariableSetResource variableSet, string appgroup) 
+public VariableSetResource UpdateVariableStepAppGroup (VariableSetResource variableSet, string appgroup)
 {
-    if (variableSet.Variables.Any(i => i.Name == "appgroup")) 
+    if (variableSet.Variables.Any(i => i.Name == "appgroup"))
     {
         Verbose($"    > Updating VariableSet 'appgroup'");
         variableSet.AddOrUpdateVariableValue("appgroup", appgroup);
