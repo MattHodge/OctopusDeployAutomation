@@ -3,7 +3,7 @@
 
 using YamlDotNet.Serialization;
 
-private List<OctopusTemplate> _templates = null;
+private IEnumerable<OctopusTemplate> _templates = null;
 
 public class OctopusDeployProject
 {
@@ -29,13 +29,13 @@ public class OctopusDeployProjectSettings
     public string AppGroup { get; set; }
 }
 
-public List<OctopusDeployProject> LoadProjectsFromYaml(FilePath yamlFile)
+public IEnumerable<OctopusDeployProject> LoadProjectsFromYaml(FilePath yamlFile)
 {
-    List<OctopusDeployProject> result;
+    IEnumerable<OctopusDeployProject> result;
 
     try
     {
-        result = DeserializeYamlFromFile<List<OctopusDeployProject>>(yamlFile);
+        result = DeserializeYamlFromFile<IEnumerable<OctopusDeployProject>>(yamlFile);
     }
     catch (Exception ex)
     {
@@ -54,11 +54,11 @@ public class OctopusTemplate
     public string Type { get; set; }
 }
 
-public List<OctopusTemplate> LoadTemplatesFromYaml(FilePath yamlFile)
+public IEnumerable<OctopusTemplate> LoadTemplatesFromYaml(FilePath yamlFile)
 {
     try
     {
-        _templates = DeserializeYamlFromFile<List<OctopusTemplate>>(yamlFile);
+        _templates = DeserializeYamlFromFile<IEnumerable<OctopusTemplate>>(yamlFile);
     }
     catch (Exception ex)
     {
@@ -70,7 +70,7 @@ public List<OctopusTemplate> LoadTemplatesFromYaml(FilePath yamlFile)
 
 public OctopusTemplate GetOctopusTemplate(OctopusDeployProject project)
 {
-    var projectTemplate = _templates.Find(i => i.Type == project.ProjectType);
+    var projectTemplate = _templates.First(i => i.Type == project.ProjectType);
 
     if (projectTemplate == null)
     {
