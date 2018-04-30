@@ -9,7 +9,7 @@ using Cake.Common.IO;
 const string OctopusLifecycleResourceName = "Default";
 
 //////////////////////////////////////////////////////////////////////
-// ARGUMENTS / ENVIRONMENT VARIABLES 
+// ARGUMENTS / ENVIRONMENT VARIABLES
 //////////////////////////////////////////////////////////////////////
 
 var target = Argument("target", "Create-Projects-From-Template");
@@ -30,7 +30,7 @@ Setup(context =>
 
 Task("Create-Projects-From-Template")
     .WithCriteria(() => FileExists(yamlFile))
-    .DoesForEach(LoadProjectsFromYaml(new FilePath(yamlFile)), (project) => 
+    .DoesForEach(LoadProjectsFromYaml(new FilePath(yamlFile)), (project) =>
     {
         Information($"Processing project '{project.Name}'");
 
@@ -46,7 +46,7 @@ Task("Create-Projects-From-Template")
         };
 
         var newProject = CreateProjectByClone(GetProjectResourceByName(projectTemplateName), newProjectSkeleton);
-        
+
         Information("Fetching, updating and saving deployment process");
         var deploymentProcess = GetDeploymentProcesses(newProject);
         var updatedDeploymentProcess = UpdateDeploymentProcessTargetRoles(deploymentProcess, project.Settings.AppGroup);
@@ -61,7 +61,7 @@ Task("Create-Projects-From-Template")
         var projectTriggers = GetProjectTriggers(newProject);
         var updatedProjectTriggers = UpdateProjectTriggerTargetRoles(projectTriggers, project.Settings.AppGroup);
         ModifyProjectTriggers(updatedProjectTriggers);
-        
+
         Information($"Project '{project.Name}' (based on the template '{projectTemplateName}') has been created");
     });
 
