@@ -85,17 +85,12 @@ function GetProxyEnabledWebClient
 {
     $wc = New-Object System.Net.WebClient
     $proxy = [System.Net.WebRequest]::GetSystemWebProxy()
-    $proxy.Credentials = [System.Net.CredentialCache]::DefaultCredentials        
+    $proxy.Credentials = [System.Net.CredentialCache]::DefaultCredentials
     $wc.Proxy = $proxy
     return $wc
 }
 
 Write-Host "Preparing to run build script..."
-
-if($ENV:VSCODE_CLI -eq 1){
-    $Verbosity = "Verbose"
-    Write-Host "Running inside Visual Studio Code, upping the verbosity!"
-}
 
 if(!$PSScriptRoot){
     $PSScriptRoot = Split-Path $MyInvocation.MyCommand.Path -Parent
@@ -120,8 +115,8 @@ if ((Test-Path $PSScriptRoot) -and !(Test-Path $TOOLS_DIR)) {
 
 # Make sure that packages.config exist.
 if (!(Test-Path $PACKAGES_CONFIG)) {
-    Write-Verbose -Message "Downloading packages.config..."    
-    try {        
+    Write-Verbose -Message "Downloading packages.config..."
+    try {
         $wc = GetProxyEnabledWebClient
         $wc.DownloadFile("https://cakebuild.net/download/bootstrapper/packages", $PACKAGES_CONFIG) } catch {
         Throw "Could not download packages.config."
@@ -221,6 +216,8 @@ if (!(Test-Path $CAKE_EXE)) {
     Throw "Could not find Cake.exe at $CAKE_EXE"
 }
 
+
+
 # Build Cake arguments
 $cakeArguments = @("$Script");
 if ($Target) { $cakeArguments += "-target=$Target" }
@@ -233,9 +230,6 @@ if ($Mono) { $cakeArguments += "-mono" }
 $cakeArguments += $ScriptArgs
 
 # Start Cake
-Write-Host "Running build script... " -NoNewLine
-if ($Verbosity) { Write-Host "$CAKE_EXE $cakeArguments" -ForegroundColor Yellow -NoNewLine }
-Write-Host ""
-
+Write-Host "Running build script..."
 &$CAKE_EXE $cakeArguments
 exit $LASTEXITCODE
