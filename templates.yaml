@@ -1,0 +1,5 @@
+---
+- name: Canary .NET 4.6.2 - Core SDK
+  type: WindowsService
+- name: Canary .NET Core 2.0
+  type: WebApplicationIIS

@@ -13,7 +13,8 @@ const string OctopusLifecycleResourceName = "Default";
 //////////////////////////////////////////////////////////////////////
 
 var target = Argument("target", "Create-Projects-From-Template");
-var yamlFile = Argument("yaml", "projects.yaml");
+var projectYamlFile = Argument("projects", "projects.yaml");
+var templateYamlFile = Argument("templates", "templates.yaml");
 
 var octopusServer = EnvironmentVariable<string>("OCTOPUS_URL");
 var octopusApiKey = EnvironmentVariable<string>("OCTOPUS_API_KEY");
@@ -26,16 +27,24 @@ Setup(context =>
 {
     CreateOctopusHelper(octopusServer, octopusApiKey);
     CreateOctopusRepository();
+
+    if (FileExists(templateYamlFile))
+    {
+        LoadTemplatesFromYaml(new FilePath(templateYamlFile));
+    }
+    else
+    {
+        throw new Exception($"Provided template file '{templateYamlFile}' could not be found");
+    }
 });
 
 Task("Create-Projects-From-Template")
-    .WithCriteria(() => FileExists(yamlFile))
-    .DoesForEach(LoadProjectsFromYaml(new FilePath(yamlFile)), (project) =>
+    .WithCriteria(() => FileExists(projectYamlFile))
+    .DoesForEach(LoadProjectsFromYaml(new FilePath(projectYamlFile)), (project) =>
     {
         Information($"Processing project '{project.Name}'");
 
-        var projectTemplateName = project.GetProjectTemplateName();
-        Information($"Project '{project.Name}' will be based on the template '{projectTemplateName}'");
+        var projectTemplate = GetOctopusTemplate(project);
 
         var newProjectSkeleton = new ProjectResource
         {
@@ -45,7 +54,7 @@ Task("Create-Projects-From-Template")
             LifecycleId = GetLifecycleResourceByName(OctopusLifecycleResourceName).Id
         };
 
-        var newProject = CreateProjectByClone(GetProjectResourceByName(projectTemplateName), newProjectSkeleton);
+        var newProject = CreateProjectByClone(GetProjectResourceByName(projectTemplate.Name), newProjectSkeleton);
 
         Information("Fetching, updating and saving deployment process");
         var deploymentProcess = GetDeploymentProcesses(newProject);
@@ -62,7 +71,7 @@ Task("Create-Projects-From-Template")
         var updatedProjectTriggers = UpdateProjectTriggerTargetRoles(projectTriggers, project.Settings.AppGroup);
         ModifyProjectTriggers(updatedProjectTriggers);
 
-        Information($"Project '{project.Name}' (based on the template '{projectTemplateName}') has been created");
+        Information($"Project '{project.Name}' (based on the template '{projectTemplate.Name}') has been created");
     });
 
 //////////////////////////////////////////////////////////////////////

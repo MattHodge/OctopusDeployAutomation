@@ -3,13 +3,9 @@
 
 using YamlDotNet.Serialization;
 
-public enum ProjectTypeEnum 
-{
-    WindowsService,
-    WebApplicationIIS
-}
+private List<OctopusTemplate> _templates = null;
 
-public class OctopusDeployProject 
+public class OctopusDeployProject
 {
     [YamlMember(Alias = "name")]
     public string Name { get; set; }
@@ -21,32 +17,19 @@ public class OctopusDeployProject
     public string Group { get; set; }
 
     [YamlMember(Alias = "type")]
-    public ProjectTypeEnum ProjectType { get; set; }
+    public string ProjectType { get; set; }
 
     [YamlMember(Alias = "settings")]
     public OctopusDeployProjectSettings Settings { get; set; }
-
-    public string GetProjectTemplateName()
-    {
-        switch (ProjectType)
-        {
-            case ProjectTypeEnum.WebApplicationIIS:
-                return "Canary .NET Core 2.0";
-            case ProjectTypeEnum.WindowsService:
-                return "Canary .NET 4.6.2 - Core SDK";
-            default:
-                throw new Exception($"Provided 'Type' value '{ProjectType}' could not be mapped to an appropriate TemplateName");
-        }
-    }
 }
 
-public class OctopusDeployProjectSettings 
+public class OctopusDeployProjectSettings
 {
     [YamlMember(Alias = "appgroup")]
     public string AppGroup { get; set; }
 }
 
-public List<OctopusDeployProject> LoadProjectsFromYaml(FilePath yamlFile) 
+public List<OctopusDeployProject> LoadProjectsFromYaml(FilePath yamlFile)
 {
     List<OctopusDeployProject> result;
 
@@ -54,10 +37,47 @@ public List<OctopusDeployProject> LoadProjectsFromYaml(FilePath yamlFile)
     {
         result = DeserializeYamlFromFile<List<OctopusDeployProject>>(yamlFile);
     }
-    catch (Exception ex) 
+    catch (Exception ex)
     {
         throw new Exception($"Failed to deserialise the YAML file '{yamlFile.FullPath}'. Check your formatting: {ex.Message}");
     }
 
     return result;
+}
+
+public class OctopusTemplate
+{
+    [YamlMember(Alias = "name")]
+    public string Name { get; set; }
+
+    [YamlMember(Alias = "type")]
+    public string Type { get; set; }
+}
+
+public List<OctopusTemplate> LoadTemplatesFromYaml(FilePath yamlFile)
+{
+    try
+    {
+        _templates = DeserializeYamlFromFile<List<OctopusTemplate>>(yamlFile);
+    }
+    catch (Exception ex)
+    {
+        throw new Exception($"Failed to deserialise the YAML file '{yamlFile.FullPath}'. Check your formatting: {ex.Message}");
+    }
+
+    return _templates;
+}
+
+public OctopusTemplate GetOctopusTemplate(OctopusDeployProject project)
+{
+    var projectTemplate = _templates.Find(i => i.Type == project.ProjectType);
+
+    if (projectTemplate == null)
+    {
+        throw new Exception($"Requested template '{project.ProjectType}' for '{project.Name}' cannot be found. Check if exists in the template yaml configuration file.");
+    }
+
+    Information($"Project '{project.Name}' will be based on the template '{projectTemplate.Name}'");
+
+    return projectTemplate;
 }
