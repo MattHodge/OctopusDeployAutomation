@@ -5,5 +5,12 @@ build:
 environment:
   my_variable:
     secure: /TWLGvacR15wTT4SOCd5Hg==
+services:
+  - mssql2017
+install:
+  - choco install octopustools -y
+  - Get-NetNat | Remove-NetNat -Confirm:$false # fix docker networking on Windows https://github.com/docker/for-win/issues/598
+  - New-NetFirewallRule -DisplayName "Allow Access to MSSQL from Docker" -Direction Inbound -LocalPort 1433 -Protocol TCP -Action Allow
+  - docker-compose up
 on_finish:
   - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
