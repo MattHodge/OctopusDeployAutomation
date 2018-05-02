@@ -13,9 +13,8 @@ install:
       Import-Module -Name NetNat
       Get-NetNat | Remove-NetNat -Confirm:$false # https://github.com/docker/for-win/issues/598
   - ps: New-NetFirewallRule -DisplayName "Allow Access to MSSQL from Docker" -Direction Inbound -LocalPort 1433 -Protocol TCP -Action Allow
+before_build:
   - ps: |
-      cd tests
-      Start-Process 'docker-compose' -ArgumentList "up -d" -Wait -NoNewWindow
-      .\get-api-key.ps1
+      Invoke-Expression ".\tests\before_build.ps1"
 on_finish:
   - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))

@@ -9,8 +9,3 @@ services:
     ports:
      - "81:81"
     stdin_open: true #Process sits and waits for ReadLine
-
-networks:
-  default:
-    external:
-      name: nat
