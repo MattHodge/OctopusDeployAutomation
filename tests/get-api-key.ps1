@@ -6,8 +6,17 @@ Write-Output "Grabbing required files from Octopus Server"
 
 $octopusContainerId = & docker ps -aq
 
-Start-Process docker -ArgumentList "cp $($octopusContainerId):`"C:\Program Files\Octopus Deploy\Octopus\Octopus.Client.dll`" $($pwd)" -Wait -NoNewWindow
-Start-Process docker -ArgumentList "cp $($octopusContainerId):`"C:\Program Files\Octopus Deploy\Octopus\Newtonsoft.Json.dll`" $($pwd)" -Wait -NoNewWindow
+$filesFromOctopusServer = @(
+    "C:\Program Files\Octopus Deploy\Octopus\Octopus.Client.dll",
+    "C:\Program Files\Octopus Deploy\Octopus\Newtonsoft.Json.dll"
+)
+
+foreach ($item in $filesFromOctopusServer) {
+    if (!(Test-Path -Path $item))
+    {
+        Start-Process docker -ArgumentList "cp $($octopusContainerId):`"$($item)`" $($pwd)" -Wait -NoNewWindow
+    }
+}
 
 $OctopusURI = "http://172.25.16.1:81" #Octopus URL
 

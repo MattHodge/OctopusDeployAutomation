@@ -9,10 +9,6 @@ environment:
   TEST_OCTOPUS_PASSWORD: GH8sf8vgs435fd
 install:
   - cinst octopustools
-  - ps: |
-      Import-Module -Name NetNat
-      Get-NetNat | Remove-NetNat -Confirm:$false # https://github.com/docker/for-win/issues/598
-  - ps: New-NetFirewallRule -DisplayName "Allow Access to MSSQL from Docker" -Direction Inbound -LocalPort 1433 -Protocol TCP -Action Allow
 before_build:
   - ps: |
       Invoke-Expression ".\tests\before_build.ps1"
