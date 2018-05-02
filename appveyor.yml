@@ -2,9 +2,6 @@ version: 1.0.{build}
 image: Visual Studio 2017
 build:
   verbosity: minimal
-environment:
-  my_variable:
-    secure: /TWLGvacR15wTT4SOCd5Hg==
 services:
   - mssql2017
 install:
