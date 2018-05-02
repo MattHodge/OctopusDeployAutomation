@@ -1,16 +1,24 @@
 version: 1.0.{build}
+
 image: Visual Studio 2017
-build:
-  verbosity: minimal
+
 services:
   - mssql2017
+
 environment:
   TEST_OCTOPUS_USERNAME: AppveyorAdmin
   TEST_OCTOPUS_PASSWORD: GH8sf8vgs435fd
+  LOCAL_MACHINE_IP: 172.25.16.1
+
 install:
   - cinst octopustools
-before_build:
-  - ps: |
-      Invoke-Expression ".\tests\before_build.ps1"
+  - ps: Invoke-Expression ".\tests\configure_agent.ps1"
+
+before_test:
+  - ps: Invoke-Expression ".\tests\start_containers.ps1"
+  - ps: Invoke-Expression ".\tests\get_octopus_api_key.ps1"
+
+build: off
+
 on_finish:
   - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))

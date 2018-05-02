@@ -18,7 +18,7 @@ foreach ($item in $filesFromOctopusServer) {
     }
 }
 
-$OctopusURI = "http://172.25.16.1:81" #Octopus URL
+$OctopusURI = "http://$($env:LOCAL_MACHINE_IP):81" #Octopus URL
 
 $APIKeyPurpose = "PowerShell" #Brief text to describe the purpose of your API Key.
 
@@ -46,7 +46,7 @@ $UserObj = $repository.Users.GetCurrent()
 #Creating API Key for user. This automatically gets saved to the database.
 $ApiObj = $repository.Users.CreateApiKey($UserObj, $APIKeyPurpose)
 
-Write-Output "Octopus API Key: $($ApiObj)"
+Write-Output "Octopus API Key: $($ApiObj.ApiKey)"
 
 #############################
 # CREATE ENVIRONMENT
