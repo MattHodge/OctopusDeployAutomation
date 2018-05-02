@@ -19,8 +19,8 @@ $repository = new-object Octopus.Client.OctopusRepository $endpoint
 
 #Creating login object
 $LoginObj = New-Object Octopus.Client.Model.LoginCommand
-$LoginObj.Username = $OctopusUsername
-$LoginObj.Password = $OctopusPassword
+$LoginObj.Username = $env:TEST_OCTOPUS_USERNAME
+$LoginObj.Password = $env:TEST_OCTOPUS_PASSWORD
 
 #Loging in to Octopus
 $repository.Users.SignIn($LoginObj)
@@ -31,8 +31,10 @@ $UserObj = $repository.Users.GetCurrent()
 #Creating API Key for user. This automatically gets saved to the database.
 $ApiObj = $repository.Users.CreateApiKey($UserObj, $APIKeyPurpose)
 
+Write-Output "Octopus API Key: $($ApiObj)"
+
 #############################
 # CREATE ENVIRONMENT
 #############################
 
-& octo create-environment --name Testing --server http://localhost --apikey $ApiObj.ApiKey
+Start-Process octo -ArgumentList "create-environment --name Testing --server $($OctopusURI) --apikey $($ApiObj.ApiKey)" -Wait -NoNewWindow

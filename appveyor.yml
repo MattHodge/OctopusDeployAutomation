@@ -4,10 +4,18 @@ build:
   verbosity: minimal
 services:
   - mssql2017
+environment:
+  TEST_OCTOPUS_USERNAME: AppveyorAdmin
+  TEST_OCTOPUS_PASSWORD: GH8sf8vgs435fd
 install:
-  - ps: choco install octopustools -y
-  - ps: Import-Module -Name NetNat; Get-NetNat | Remove-NetNat -Confirm:$false # https://github.com/docker/for-win/issues/598
+  - cinst octopustools
+  - ps: |
+      Import-Module -Name NetNat
+      Get-NetNat | Remove-NetNat -Confirm:$false # https://github.com/docker/for-win/issues/598
   - ps: New-NetFirewallRule -DisplayName "Allow Access to MSSQL from Docker" -Direction Inbound -LocalPort 1433 -Protocol TCP -Action Allow
-  - ps: cd tests ; docker-compose up
+  - ps: |
+      cd tests
+      docker-compose up -d
+      .\get-api-key.ps1
 on_finish:
   - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
