@@ -15,7 +15,7 @@ install:
   - ps: New-NetFirewallRule -DisplayName "Allow Access to MSSQL from Docker" -Direction Inbound -LocalPort 1433 -Protocol TCP -Action Allow
   - ps: |
       cd tests
-      docker-compose up -d
+      Start-Process 'docker-compose' -ArgumentList "up -d" -Wait -NoNewWindow
       .\get-api-key.ps1
 on_finish:
   - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
